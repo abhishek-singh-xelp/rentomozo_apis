@@ -5,14 +5,16 @@ import express from "express";
 import path from "path";
 import cookieParser from "cookie-parser";
 
-import { ApplicationError } from "./lib/errors";
-import { verify as verifyMiddleware } from "./routes/sessions";
 import {
-  registerUser,
-  login as getLoginRoutes,
-  updateUser,
-  getById as getByIdUserRoutes
-} from "./routes/user";
+  ApplicationError
+} from "./lib/errors";
+import {
+  verify as verifyMiddleware
+} from "./routes/sessions";
+import {
+  saveReferenceUrl,
+  getParams
+} from "./routes/url";
 
 export default function createRouter() {
   // *********
@@ -55,10 +57,9 @@ export default function createRouter() {
    * users endpoints
    */
   // the sessions.verify middleware ensures the user is logged in
-  router.post("/user/register", registerUser);
-  router.post("/user/login", getLoginRoutes);
-  router.put("/user/:Id/forgotPassWord", updateUser);
-  router.get("/user/:Id", getByIdUserRoutes);
+  router.get("/url/register", saveReferenceUrl);
+
+  router.get("/url/:path", getParams);
   // router.get("/users", verifyMiddleware, getUserRoutes);
 
   // ******************
@@ -79,7 +80,10 @@ export default function createRouter() {
     if (err instanceof ApplicationError) {
       res.status(err.statusCode).send({
         data: err.data || {},
-        message: { errMsg: err.message, errCode: err.statusCode }
+        message: {
+          errMsg: err.message,
+          errCode: err.statusCode
+        }
       });
       return;
     }
